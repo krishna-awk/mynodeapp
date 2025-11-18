@@ -26,11 +26,16 @@ module.exports = {
       script: 'gateway.js',
       cwd: __dirname,
       interpreter: 'node',
+      // Load .env.dev file automatically
+      env_file: '.env.dev',
       env: {
-        NODE_ENV: 'production',
+        NODE_ENV: process.env.NODE_ENV || 'production',
+        GATEWAY_HTTP_PORT: process.env.GATEWAY_HTTP_PORT || '8080',
+        GATEWAY_HTTPS_PORT: process.env.GATEWAY_HTTPS_PORT || '4443',
+        GATEWAY_ENABLE_HTTPS: process.env.GATEWAY_ENABLE_HTTPS || 'true',
         GATEWAY_ADMIN_TOKEN: process.env.GATEWAY_ADMIN_TOKEN || 'changeme-dev-token',
-        // Default to disabled under pm2; use '1' to enable
-        GATEWAY_ADMIN_WS: process.env.GATEWAY_ADMIN_WS || '0'
+        GATEWAY_ADMIN_WS: process.env.GATEWAY_ADMIN_WS || '1',
+        LOG_LEVEL: process.env.LOG_LEVEL || 'info'
       },
       // keep the process running across reboots
       autorestart: true,

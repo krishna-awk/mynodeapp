@@ -10,8 +10,26 @@ import httpProxy from "http-proxy";
 import { request } from "undici";
 import * as acme from "acme-client";
 import selfsigned from "selfsigned";
+import dotenv from "dotenv";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
+
+// Load environment variables from .env.dev or .env files
+const envFiles = [
+  path.join(__dirname, '.env.dev'),
+  path.join(__dirname, '.env'),
+  path.join(__dirname, '..', '.env.dev'),
+  path.join(__dirname, '..', '.env')
+];
+
+for (const envFile of envFiles) {
+  if (fs.existsSync(envFile)) {
+    console.log(`[env] Loading environment from: ${envFile}`);
+    dotenv.config({ path: envFile });
+    break;
+  }
+}
+
 const cfg = JSON.parse(fs.readFileSync(path.join(__dirname, "gateway.config.json"), "utf8"));
 
 /* ------------------- App Manager / Admin Control Plane ------------------ */
@@ -417,9 +435,13 @@ proxy.on('proxyRes', (proxyRes, req, res) => {
 });
 
 
-// Allow overriding listen ports via env
-const HTTP_PORT = parseInt(process.env.GATEWAY_HTTP_PORT || '8080', 10);
-const HTTPS_PORT = parseInt(process.env.GATEWAY_HTTPS_PORT || '4443', 10);
+// Allow overriding listen ports via env (with config fallback)
+const HTTP_PORT = parseInt(process.env.GATEWAY_HTTP_PORT || cfg.httpPort || '8080', 10);
+const HTTPS_PORT = parseInt(process.env.GATEWAY_HTTPS_PORT || cfg.httpsPort || '4443', 10);
+
+console.log(`[config] HTTP Port: ${HTTP_PORT}, HTTPS Port: ${HTTPS_PORT}`);
+console.log(`[config] Admin Token: ${adminToken ? '***set***' : 'NOT SET'}`);
+console.log(`[config] Node Environment: ${process.env.NODE_ENV || 'development'}`);
 
 // Certificate cache with TTL (24 hours)
 const secureContextCache = new Map(); // hostname -> { context, expires }

@@ -1,4 +1,6 @@
 {
+  "httpPort": 8080,
+  "httpsPort": 4443,
   "email": "krishnapawk@gmail.com",
   "agreeToTerms": true,
   "acme": {

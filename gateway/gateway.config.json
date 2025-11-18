@@ -12,6 +12,7 @@
   "adminToken": "changeme-dev-token",
   "apps": [
     {
+      "# comment": "Example: Node app that inherits NODE_ENV from gateway .env.dev",
       "host": "local.console",
       "altNames": [
         "local.console"
@@ -25,6 +26,7 @@
       "disabled": false
     },
     {
+      "# comment": "Example: App with its own .env file",
       "host": "app.local.console",
       "altNames": [
         "app.local.console"
@@ -40,7 +42,7 @@
       "disabled": false
     },
     {
-      "# static-site": "Serve a built React app (spa) from disk. Useful for production or a built prototype",
+      "# comment": "Example: Static site (React/Vue/Angular build)",
       "host": "local.stacktrades",
       "altNames": [
         "local.stacktrades"

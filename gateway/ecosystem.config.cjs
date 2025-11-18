@@ -29,7 +29,7 @@ module.exports = {
       // Load .env.dev file automatically
       env_file: '.env.dev',
       env: {
-        NODE_ENV: process.env.NODE_ENV || 'production',
+        NODE_ENV: process.env.NODE_ENV || 'development',
         GATEWAY_HTTP_PORT: process.env.GATEWAY_HTTP_PORT || '8080',
         GATEWAY_HTTPS_PORT: process.env.GATEWAY_HTTPS_PORT || '4443',
         GATEWAY_ENABLE_HTTPS: process.env.GATEWAY_ENABLE_HTTPS || 'true',

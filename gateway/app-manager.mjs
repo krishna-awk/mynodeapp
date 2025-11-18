@@ -142,9 +142,47 @@ export class AppManager extends EventEmitter {
     const args = cleaned.slice(1);
     const wantShell = app.shell === true; // allow explicit opt-in
     let child;
+    
+    // Build environment for child process
+    // Priority: app.env > gateway's process.env > defaults
+    const childEnv = { ...process.env };
+    
+    // Pass through NODE_ENV from gateway (respects .env.dev)
+    if (process.env.NODE_ENV) {
+      childEnv.NODE_ENV = process.env.NODE_ENV;
+    }
+    
+    // Allow app-specific env overrides from config
+    if (app.env && typeof app.env === 'object') {
+      Object.assign(childEnv, app.env);
+    }
+    
+    // Support loading .env files from app directory
+    if (app.envFile && app.cwd) {
+      try {
+        const envPath = path.isAbsolute(app.envFile) 
+          ? app.envFile 
+          : path.join(app.cwd, app.envFile);
+        if (fs.existsSync(envPath)) {
+          const envContent = fs.readFileSync(envPath, 'utf8');
+          envContent.split('\n').forEach(line => {
+            const match = line.trim().match(/^([^#=]+)=(.*)$/);
+            if (match) {
+              const key = match[1].trim();
+              const value = match[2].trim().replace(/^["']|["']$/g, '');
+              if (!childEnv[key]) childEnv[key] = value; // don't override existing
+            }
+          });
+          this.emit('app-log', { host: key, stream: 'stdout', line: `[env] Loaded ${app.envFile}` });
+        }
+      } catch (e) {
+        this.emit('app-log', { host: key, stream: 'stderr', line: `[env] Failed to load ${app.envFile}: ${e.message}` });
+      }
+    }
+    
     const spawnOptsBase = {
       cwd: app.cwd,
-      env: { ...process.env, NODE_ENV: process.env.NODE_ENV || 'production' }
+      env: childEnv
     };
     // Ensure Node install dir is on PATH (helps find npm.cmd when service/user PATH trimmed)
     try {
